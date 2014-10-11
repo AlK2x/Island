@@ -38,14 +38,15 @@ public class IslandVisualizer {
         StdDraw.show(0);
 
         // repeatedly read in sites to open and draw resulting system
-        Island island = new Island();
+        int N = 5;
+        Island island = new Island(N);
         island.setLifeTime(42);
-        draw(island, 10);
+        draw(island, N);
         StdDraw.show(0);
         StdDraw.show(DELAY);
         while (!island.isEndOfTime()) {
             island.tickTack();
-            draw(island, 10);
+            draw(island, N);
             StdDraw.show(DELAY);
         }
     }

@@ -1,11 +1,12 @@
 
 public class Island {
 
-    private int N = 10;
+    private int N;
     private TerrainField[][] island;
     private int time;
 
-    public Island() {
+    public Island(int N) {
+        this.N = N;
         this.island = new TerrainField[N][N];
         for (int i = 0; i < N; ++i) {
             for (int j = 0; j < N; ++j) {
