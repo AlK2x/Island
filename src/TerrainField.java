@@ -36,8 +36,48 @@ public class TerrainField {
         this.generateWeather();
     }
 
+    private void grassDie() {
+        if (this.juiciness > 0) {
+            --this.juiciness;
+        }
+    }
+
+    private void grassGrow() {
+        if (this.juiciness < 5) {
+            ++this.juiciness;
+        }
+    }
+
     private void changeMeadow() {
-        // изменить траву в соответствии с погодой
+        if (this.sun == 0) {
+            if (this.rain == 3) {
+                this.grassDie();
+            }
+        }
+        else if (this.sun == 1) {
+            if (this.rain == 1) {
+                this.grassGrow();
+            }
+            else if (this.rain == 2) {
+                this.grassGrow();
+            }
+        }
+        else if (this.sun == 2) {
+            if (this.rain > 0) {
+                this.grassGrow();
+            }
+        }
+        else if (this.sun == 3) {
+            if (this.rain == 0) {
+                this.grassDie();
+            }
+            else if (this.rain == 2) {
+                this.grassGrow();
+            }
+            else if (this.rain == 3) {
+                this.grassGrow();
+            }
+        }
     }
 
     private void generateWeather() {

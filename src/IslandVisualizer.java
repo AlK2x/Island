@@ -1,4 +1,4 @@
-import java.awt.Font;
+import java.awt.*;
 
 public class IslandVisualizer {
 
@@ -20,12 +20,12 @@ public class IslandVisualizer {
                     StdDraw.setPenColor(StdDraw.BLUE);
                 }
                 else if (terrain.getTerrainType() == TerrainField.MOUNT) {
-                    StdDraw.setPenColor(StdDraw.GRAY);
+                    StdDraw.setPenColor(StdDraw.BLACK);
                 }
                 else if (terrain.getTerrainType() == TerrainField.MEADOW) {
                     // change meadow color, in order to juiciness
                     int juice = terrain.getJuiciness();
-                    StdDraw.setPenColor(StdDraw.GREEN);
+                    StdDraw.setPenColor(new Color(0, 100 + juice * 31, 0));
                 }
                 StdDraw.filledSquare(col - 0.5, N - row + 0.5, 0.45);
             }
