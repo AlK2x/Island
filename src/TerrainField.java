@@ -15,6 +15,11 @@ public class TerrainField {
         this.juiciness = 0;
     }
 
+    public void updateTerrain() {
+        this.changeWeather();
+        this.changeMeadow();
+    }
+
     public int getTerrainType() {
         return this.terrainType;
     }
@@ -27,8 +32,12 @@ public class TerrainField {
         return this.juiciness;
     }
 
-    public void changeWeather() {
+    private void changeWeather() {
         this.generateWeather();
+    }
+
+    private void changeMeadow() {
+        // изменить траву в соответствии с погодой
     }
 
     private void generateWeather() {

@@ -3,6 +3,7 @@ public class Island {
 
     private int N = 10;
     private TerrainField[][] island;
+    private int time;
 
     public Island() {
         this.island = new TerrainField[N][N];
@@ -19,8 +20,25 @@ public class Island {
         return island[i - 1][j - 1];
     }
 
-    public void tickTack() {
+    public void setLifeTime(int time) {
+        this.time = time;
+    }
 
+    public boolean isEndOfTime() {
+        return this.time == 0;
+    }
+
+    public void tickTack() {
+        --time;
+        this.updateIsland();
+    }
+
+    private void updateIsland() {
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < N; ++j) {
+                island[i][j].updateTerrain();
+            }
+        }
     }
 
     private void checkIsland() {

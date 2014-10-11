@@ -3,7 +3,7 @@ import java.awt.Font;
 public class IslandVisualizer {
 
     // delay in miliseconds (controls animation speed)
-    private static final int DELAY = 300;
+    private static final int DELAY = 500;
 
     // draw N-by-N percolation system
     public static void draw(Island island, int N) {
@@ -39,11 +39,14 @@ public class IslandVisualizer {
 
         // repeatedly read in sites to open and draw resulting system
         Island island = new Island();
+        island.setLifeTime(42);
         draw(island, 10);
         StdDraw.show(0);
-        //StdDraw.show(DELAY);
-/*        while (!in.isEmpty()) {
-            // update island
-        }*/
+        StdDraw.show(DELAY);
+        while (!island.isEndOfTime()) {
+            island.tickTack();
+            draw(island, 10);
+            StdDraw.show(DELAY);
+        }
     }
 }
