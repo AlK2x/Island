@@ -13,11 +13,25 @@ public class TerrainField {
     public TerrainField(int type) {
         this.terrainType = type;
         this.juiciness = 0;
+        this.rain = 0;
+        this.sun = 0;
+        this.changeWeather();
     }
 
-    public void updateTerrain() {
-        this.changeWeather();
-        this.changeMeadow();
+    public void updateTerrain(boolean isNearWater) {
+        if (this.getTerrainType() == TerrainField.MEADOW)
+        {
+            this.changeMeadow( isNearWater );
+            this.changeWeather();
+        }
+    }
+
+    public int getRain() {
+        return this.rain;
+    }
+
+    public int getSun() {
+        return this.sun;
     }
 
     public int getTerrainType() {
@@ -33,7 +47,9 @@ public class TerrainField {
     }
 
     private void changeWeather() {
-        this.generateWeather();
+        if (this.getTerrainType() == TerrainField.MEADOW) {
+            this.generateWeather();
+        }
     }
 
     private void grassDie() {
@@ -42,13 +58,13 @@ public class TerrainField {
         }
     }
 
-    private void grassGrow() {
+    public void grassGrow() {
         if (this.juiciness < 5) {
             ++this.juiciness;
         }
     }
 
-    private void changeMeadow() {
+    private void changeMeadow(boolean isNearWater) {
         if (this.sun == 0) {
             if (this.rain == 3) {
                 this.grassDie();
@@ -61,21 +77,21 @@ public class TerrainField {
             else if (this.rain == 2) {
                 this.grassGrow();
             }
+            else if (isNearWater) {
+                this.grassGrow();
+            }
         }
         else if (this.sun == 2) {
-            if (this.rain > 0) {
+            if ( (this.rain > 0) || (isNearWater) ) {
                 this.grassGrow();
             }
         }
         else if (this.sun == 3) {
-            if (this.rain == 0) {
+            if ( isNearWater ) {
+                this.grassGrow();
+            }
+            else if (this.rain == 0) {
                 this.grassDie();
-            }
-            else if (this.rain == 2) {
-                this.grassGrow();
-            }
-            else if (this.rain == 3) {
-                this.grassGrow();
             }
         }
     }
@@ -83,11 +99,11 @@ public class TerrainField {
     private void generateWeather() {
         this.sun = StdRandom.uniform(4);
         this.rain = StdRandom.uniform(4);
-        if (this.sun == 3) {
-            this.rain = 0;
-        }
-        else if (this.rain == 3) {
+        if (this.rain == 3) {
             this.sun = 0;
+        }
+        else if (this.sun == 3) {
+            this.rain = 0;
         }
     }
 }
