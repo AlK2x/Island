@@ -1,9 +1,15 @@
 import java.awt.*;
+import java.awt.EventQueue;
+import java.awt.GridLayout;
+import javax.swing.*;
+import java.awt.event.KeyEvent;
 
 public class IslandVisualizer {
 
     // delay in miliseconds (controls animation speed)
     private static final int DELAY = 1000;
+    private static final int RESOLUTION = 800;
+    private static boolean lockedMouse = false;
 
     // draw N-by-N percolation system
     public static void drawMountain(int col, int row, int N) {
@@ -32,8 +38,8 @@ public class IslandVisualizer {
         StdDraw.setYscale(0, N);
         StdDraw.filledSquare(N/2.0, N/2.0, N/2.0);
 
-        for (int row = 1; row <= N; row++) {
-            for (int col = 1; col <= N; col++) {
+        for (int row = N; row >= 1; row--) {
+            for (int col = N; col >= 1; col--) {
                 TerrainField terrain = island.getTerrainField(row, col);
                 String text = "";
                 if (terrain.getTerrainType() == TerrainField.WATER) {
@@ -65,6 +71,40 @@ public class IslandVisualizer {
         }
     }
 
+    private static void displayPopup(TerrainField field) {
+        String[] items = {"ВОДА", "ГОРЫ", "ЛУГ"};
+        JComboBox combo = new JComboBox(items);
+        combo.setSelectedIndex(field.getTerrainType() - 1);
+        JTextField field1 = new JTextField(String.valueOf(field.getJuiciness()));
+        JTextField field2 = new JTextField("I'm rabbit.");
+
+
+        JPanel panel = new JPanel(new GridLayout(0, 1));
+        panel.add(combo);
+        panel.add(new JLabel("Сочность:"));
+        panel.add(field1);
+        panel.add(new JLabel("Кролики:"));
+        panel.add(field2);
+        int result = JOptionPane.showConfirmDialog(null, panel, "Test",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            System.out.println(combo.getSelectedItem()
+                    + " " + field1.getText()
+                    + " " + field2.getText());
+
+        } else {
+            System.out.println("Cancelled");
+
+        }
+    }
+
+    private static TerrainField findTerrain(Island island, int x, int y, int N) {
+        StdOut.println(x);
+        StdOut.println(y);
+        StdOut.println(island.getTerrainField(y, x).getTerrainType());
+        return island.getTerrainField(y, x);
+    }
+
     public static void main(String[] args) {
 
         // turn on animation mode
@@ -77,7 +117,7 @@ public class IslandVisualizer {
         //StdDraw.show(0);
 
 
-        StdDraw.setCanvasSize(800, 800);
+        StdDraw.setCanvasSize(RESOLUTION, RESOLUTION);
         draw(island, N);
 
 
@@ -87,12 +127,16 @@ public class IslandVisualizer {
             draw(island, N);
             StdDraw.show(DELAY);
         }*/
-
         while (true) {
-            if (StdDraw.mousePressed()) {
-
+            if (StdDraw.isKeyPressed(KeyEvent.VK_RIGHT)) {
                 island.tickTack();
                 draw(island, N);
+            }
+            if (StdDraw.isKeyPressed(KeyEvent.VK_ENTER) && !StdIn.isEmpty()) {
+                int i = StdIn.readInt();
+                int j = StdIn.readInt();
+                findTerrain(island, i, j, N);
+                displayPopup(findTerrain(island, i, j, N));
             }
             StdDraw.show(250);
         }
