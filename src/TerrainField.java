@@ -9,12 +9,14 @@ public class TerrainField {
     private int juiciness;
     private int rain;
     private int sun;
+    private int rabbits;
 
     public TerrainField(int type) {
         this.terrainType = type;
         this.juiciness = 0;
         this.rain = 0;
         this.sun = 0;
+        this.rabbits = 0;
         this.changeWeather();
     }
 
@@ -24,6 +26,10 @@ public class TerrainField {
             this.changeMeadow( isNearWater );
             this.changeWeather();
         }
+    }
+
+    public void updateRabbits(RandomizedQueue<TerrainField> neighbourFields) {
+        // some code will be here
     }
 
     public int getRain() {
@@ -61,6 +67,19 @@ public class TerrainField {
     public void grassGrow() {
         if (this.juiciness < 5) {
             ++this.juiciness;
+        }
+    }
+
+    private void addRabbit()
+    {
+        ++this.rabbits;
+    }
+
+    private void dieRabbit()
+    {
+        if (this.rabbits > 0)
+        {
+            --this.rabbits;
         }
     }
 

@@ -1,3 +1,4 @@
+import java.util.Set;
 
 public class Island {
 
@@ -48,11 +49,39 @@ public class Island {
         return terrainType;
     }
 
+    private RandomizedQueue<TerrainField> getNeighboringFields(int i, int j) {
+        RandomizedQueue<TerrainField> neighboringFields = new RandomizedQueue<TerrainField>();
+        TerrainField tempField;
+        try {
+            if (this.getTerrainField(i + 1, j).getTerrainType() == TerrainField.MEADOW) {
+                neighboringFields.enqueue(this.getTerrainField(i + 1, j));
+            }
+        } catch (IndexOutOfBoundsException e) {}
+        try {
+            if (this.getTerrainField(i - 1, j).getTerrainType() == TerrainField.MEADOW) {
+                neighboringFields.enqueue(this.getTerrainField(i - 1, j));
+            }
+        } catch (IndexOutOfBoundsException e) {}
+        try {
+            if (this.getTerrainField(i, j + 1).getTerrainType() == TerrainField.MEADOW) {
+                neighboringFields.enqueue(this.getTerrainField(i, j + 1));
+            }
+        } catch (IndexOutOfBoundsException e) {}
+        try {
+            if (this.getTerrainField(i, j - 1).getTerrainType() == TerrainField.MEADOW) {
+                neighboringFields.enqueue(this.getTerrainField(i, j - 1));
+            }
+        } catch (IndexOutOfBoundsException e) {}
+
+        return neighboringFields;
+    }
+
     private void updateIsland() {
         for (int i = 0; i < this.N; ++i) {
             for (int j = 0; j < this.N; ++j) {
                 //System.out.println("[" + Integer.toString(i) + "," + Integer.toString(j) + "] " + Boolean.toString(isNearWater(i, j)) + " type=" + Integer.toString(island[i][j].getTerrainType()));
                 island[i][j].updateTerrain( isNearWater(i, j) );
+                island[i][j].updateRabbits(this.getNeighboringFields(i, j));
             }
         }
     }
