@@ -29,7 +29,19 @@ public class TerrainField {
     }
 
     public void updateRabbits(RandomizedQueue<TerrainField> neighbourFields) {
-        // some code will be here
+        if (this.isNeedUpdateRabbits()) {
+            if (this.rabbits > this.juiciness) {
+                // need code for migrate to neighbourFields;
+                this.dieRabbit();
+            }
+            if (this.rabbits >= 2) {
+                this.addRabbit();
+            }
+        }
+    }
+
+    public int getRabbits() {
+        return this.rabbits;
     }
 
     public int getRain() {
@@ -50,6 +62,10 @@ public class TerrainField {
 
     public int getJuiciness() {
         return this.juiciness;
+    }
+
+    private boolean isNeedUpdateRabbits() {
+        return (this.rabbits >= 2) || (this.rabbits > this.juiciness);
     }
 
     private void changeWeather() {
