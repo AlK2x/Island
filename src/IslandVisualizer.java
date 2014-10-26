@@ -3,6 +3,10 @@ import java.awt.EventQueue;
 import java.awt.GridLayout;
 import javax.swing.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.concurrent.TimeUnit;
+
 
 public class IslandVisualizer {
 
@@ -76,33 +80,40 @@ public class IslandVisualizer {
         JComboBox combo = new JComboBox(items);
         combo.setSelectedIndex(field.getTerrainType() - 1);
         JTextField field1 = new JTextField(String.valueOf(field.getJuiciness()));
-        JTextField field2 = new JTextField("I'm rabbit.");
+        JTextField field2 = new JTextField(String.valueOf(field.getRabbits()));
 
 
         JPanel panel = new JPanel(new GridLayout(0, 1));
         panel.add(combo);
-        panel.add(new JLabel("Сочность:"));
+        panel.add(new JLabel("Трава:"));
         panel.add(field1);
         panel.add(new JLabel("Кролики:"));
         panel.add(field2);
-        int result = JOptionPane.showConfirmDialog(null, panel, "Test",
+        int result = JOptionPane.showConfirmDialog(null, panel, "Тонкая настройка",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
-            System.out.println(combo.getSelectedItem()
-                    + " " + field1.getText()
-                    + " " + field2.getText());
-
+            field.setTerrainType(combo.getSelectedIndex() + 1);
+            field.setJuiciness(Integer.parseInt(field1.getText()));
+            field.setRabbits(Integer.parseInt(field2.getText()));
         } else {
             System.out.println("Cancelled");
-
         }
     }
 
     private static TerrainField findTerrain(Island island, int x, int y, int N) {
-        StdOut.println(x);
-        StdOut.println(y);
+        StdOut.println("find");
         StdOut.println(island.getTerrainField(y, x).getTerrainType());
         return island.getTerrainField(y, x);
+    }
+
+    private static int InvertCoord(int y, int N) {
+        int arr[] = new int[N + 1];
+        int st = N;
+        for (int i = 1; i <= N; ++i) {
+            arr[i] = st--;
+        }
+
+        return arr[y];
     }
 
     public static void main(String[] args) {
@@ -119,25 +130,29 @@ public class IslandVisualizer {
 
         StdDraw.setCanvasSize(RESOLUTION, RESOLUTION);
         draw(island, N);
-
-
-        //StdDraw.show(DELAY);
-        /*while (!island.isEndOfTime()) {
-            island.tickTack();
-            draw(island, N);
-            StdDraw.show(DELAY);
-        }*/
         while (true) {
             if (StdDraw.isKeyPressed(KeyEvent.VK_RIGHT)) {
                 island.tickTack();
                 draw(island, N);
             }
-            if (StdDraw.isKeyPressed(KeyEvent.VK_ENTER) && !StdIn.isEmpty()) {
-                int i = StdIn.readInt();
-                int j = StdIn.readInt();
-                findTerrain(island, i, j, N);
-                displayPopup(findTerrain(island, i, j, N));
+
+            if (StdDraw.mousePressed())
+            {
+                StdOut.println(StdDraw.mouseX());
+                StdOut.println(StdDraw.mouseY());
+                lockedMouse = true;
             }
+
+            if (StdDraw.isKeyPressed(KeyEvent.VK_ENTER) && lockedMouse)
+            {
+                StdOut.println("lock");
+                int x = (int) StdDraw.mouseX() + 1;
+                int y = InvertCoord((int) StdDraw.mouseY() + 1, N);
+                displayPopup(findTerrain(island, x, y, N));
+                draw(island, N);
+                lockedMouse = false;
+            }
+
             StdDraw.show(250);
         }
     }

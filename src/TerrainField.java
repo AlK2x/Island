@@ -64,6 +64,14 @@ public class TerrainField {
         return this.juiciness;
     }
 
+    public void setJuiciness(int i) {
+        this.juiciness = i;
+    }
+
+    public void setRabbits(int i) {
+        this.rabbits = i;
+    }
+
     private boolean isNeedUpdateRabbits() {
         return (this.rabbits >= 2) || (this.rabbits > this.juiciness);
     }
