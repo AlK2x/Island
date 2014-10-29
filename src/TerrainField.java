@@ -25,19 +25,53 @@ public class TerrainField {
         {
             this.changeMeadow( isNearWater );
             this.changeWeather();
+
         }
     }
 
     public void updateRabbits(RandomizedQueue<TerrainField> neighbourFields) {
         if (this.isNeedUpdateRabbits()) {
             if (this.rabbits > this.juiciness) {
-                // need code for migrate to neighbourFields;
-                this.dieRabbit();
+                int refugees = Math.abs(this.rabbits - this.juiciness);
+                for (TerrainField field : neighbourFields)
+                {
+                    if (field.hasPlaceForRabbit())
+                    {
+                        int numPlacesForRabbit = 3 - field.getRabbits();
+                        int diff = refugees - numPlacesForRabbit;
+                        if (diff <= 0)
+                        {
+                            field.setRabbits(field.getRabbits() + refugees);
+                            this.juiciness -= refugees;
+                            break;
+                        }
+                        else
+                        {
+                            field.setRabbits(field.getRabbits() + diff);
+                            this.juiciness -= diff;
+                            refugees = diff;
+                        }
+                    }
+                }
+                if (refugees > 0)
+                {
+                    while (refugees != 0)
+                    {
+                        this.dieRabbit();
+                        --refugees;
+                    }
+                }
             }
+            this.rabbitEatTheGrass();
             if (this.rabbits >= 2) {
                 this.addRabbit();
             }
         }
+    }
+
+    public boolean hasPlaceForRabbit()
+    {
+        return this.juiciness > 0 && this.rabbits < 3;
     }
 
     public int getRabbits() {
@@ -74,6 +108,11 @@ public class TerrainField {
 
     private boolean isNeedUpdateRabbits() {
         return (this.rabbits >= 2) || (this.rabbits > this.juiciness);
+    }
+
+    private void rabbitEatTheGrass()
+    {
+        this.juiciness = ((juiciness - this.rabbits)) >= 0 ? juiciness - this.rabbits : 0;
     }
 
     private void changeWeather() {

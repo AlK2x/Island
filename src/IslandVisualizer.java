@@ -33,6 +33,16 @@ public class IslandVisualizer {
         {
             StdDraw.picture(col-0.25, N-row+0.75,"images/sun0" + Integer.toString(sunState) + ".png", 0.47, 0.47);
         }
+
+    }
+
+    private static void drawRabbit(int col, int row, TerrainField field, int N)
+    {
+        int rabbits = field.getRabbits();
+        if (rabbits > 0)
+        {
+            StdDraw.text(col-0.75, N-row+0.75, Integer.toString(rabbits));
+        }
     }
 
     public static void draw(Island island, int N) {
@@ -71,6 +81,7 @@ public class IslandVisualizer {
                 }
 
                 drawWeather(col, row, terrain.getRain(), terrain.getSun(), N);
+                drawRabbit(col, row, terrain, N);
             }
         }
     }
@@ -122,7 +133,7 @@ public class IslandVisualizer {
         //StdDraw.show(0);
 
         // repeatedly read in sites to open and draw resulting system
-        int N = 4;
+        int N = 8;
         Island island = new Island(N);
         island.setLifeTime(42);
         //StdDraw.show(0);
