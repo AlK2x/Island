@@ -155,6 +155,21 @@ public class IslandVisualizer {
                 lockedMouse = true;
             }
 
+            if (StdDraw.isKeyPressed(KeyEvent.VK_Q)) {
+                for (int i = 0; i < N; ++i) {
+                    for (int j = 0; j < N; ++j) {
+                        TerrainField curr = island.getTerrainField(i + 1, j + 1);
+                        if (curr.getTerrainType() == TerrainField.MEADOW) {
+                            int rand = StdRandom.uniform(0, 15);
+                            if (rand <= 3 ) {
+                                curr.setRabbits(rand);
+                            }
+                        }
+                    }
+                }
+                draw(island, N);
+            }
+
             if (StdDraw.isKeyPressed(KeyEvent.VK_ENTER) && lockedMouse)
             {
                 try {
