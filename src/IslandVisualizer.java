@@ -157,12 +157,17 @@ public class IslandVisualizer {
 
             if (StdDraw.isKeyPressed(KeyEvent.VK_ENTER) && lockedMouse)
             {
-                StdOut.println("lock");
-                int x = (int) StdDraw.mouseX() + 1;
-                int y = InvertCoord((int) StdDraw.mouseY() + 1, N);
-                displayPopup(findTerrain(island, x, y, N));
-                draw(island, N);
-                lockedMouse = false;
+                try {
+                    int x = (int) StdDraw.mouseX() + 1;
+                    int y = InvertCoord((int) StdDraw.mouseY() + 1, N);
+                    displayPopup(findTerrain(island, x, y, N));
+                    draw(island, N);
+                    lockedMouse = false;
+                }
+                catch (IndexOutOfBoundsException e) {
+                    lockedMouse = false;
+                    continue;
+                }
             }
 
             StdDraw.show(250);
