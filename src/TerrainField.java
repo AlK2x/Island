@@ -4,6 +4,9 @@ public class TerrainField {
     public static final int WATER = 1;
     public static final int MOUNT = 2;
     public static final int MEADOW = 3;
+    public static final int MAX_JUCINESS = 5;
+    public static final int MAX_RABBITS = 3;
+
 
     private int terrainType;
     private int juiciness;
@@ -63,7 +66,7 @@ public class TerrainField {
                 }
             }
             this.rabbitEatTheGrass();
-            if (this.rabbits >= 2) {
+            if (this.rabbits == 2) {
                 this.addRabbit();
             }
         }
@@ -92,6 +95,11 @@ public class TerrainField {
 
     public void setTerrainType(int type) {
         this.terrainType = type;
+        if ( type != TerrainField.MEADOW ) {
+            this.setSun(0);
+            this.setRain(0);
+            this.setRabbits(0);
+        }
     }
 
     public int getJuiciness() {
@@ -99,12 +107,21 @@ public class TerrainField {
     }
 
     public void setJuiciness(int i) {
-        this.juiciness = i;
+        if (i >= 0) {
+            this.juiciness = Math.min(i, TerrainField.MAX_JUCINESS);
+        }
     }
 
     public void setRabbits(int i) {
-        this.rabbits = i;
+        if ((i >= 0) && (this.getTerrainType() == TerrainField.MEADOW)) {
+            this.rabbits = Math.min(i, TerrainField.MAX_RABBITS);
+        }
     }
+
+
+    public void setSun(int i) { this.sun = i; }
+
+    public void setRain(int i) { this.rain = i; }
 
     private boolean isNeedUpdateRabbits() {
         return (this.rabbits >= 2) || (this.rabbits > this.juiciness);
@@ -128,7 +145,7 @@ public class TerrainField {
     }
 
     public void grassGrow() {
-        if (this.juiciness < 5) {
+        if (this.juiciness < TerrainField.MAX_JUCINESS) {
             ++this.juiciness;
         }
     }

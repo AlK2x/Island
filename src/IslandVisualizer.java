@@ -41,7 +41,7 @@ public class IslandVisualizer {
         int rabbits = field.getRabbits();
         if (rabbits > 0)
         {
-            StdDraw.text(col-0.75, N-row+0.75, Integer.toString(rabbits));
+            StdDraw.picture(col-0.35, N-row+0.25, "images/rabbit0" + Integer.toString(rabbits) + ".png", 0.35 + rabbits * 0.07 , 0.35 + rabbits * 0.05 );
         }
     }
 
@@ -133,7 +133,7 @@ public class IslandVisualizer {
         //StdDraw.show(0);
 
         // repeatedly read in sites to open and draw resulting system
-        int N = 8;
+        int N = 6;
         Island island = new Island(N);
         island.setLifeTime(42);
         //StdDraw.show(0);
@@ -141,6 +141,7 @@ public class IslandVisualizer {
 
         StdDraw.setCanvasSize(RESOLUTION, RESOLUTION);
         draw(island, N);
+
         while (true) {
             if (StdDraw.isKeyPressed(KeyEvent.VK_RIGHT)) {
                 island.tickTack();
