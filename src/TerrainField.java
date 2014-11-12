@@ -1,3 +1,4 @@
+import org.omg.PortableInterceptor.INACTIVE;
 
 public class TerrainField {
 
@@ -6,6 +7,7 @@ public class TerrainField {
     public static final int MEADOW = 3;
     public static final int MAX_JUCINESS = 5;
     public static final int MAX_RABBITS = 3;
+    public static final int MAX_HUNTERS = 3;
 
 
     private int terrainType;
@@ -13,6 +15,7 @@ public class TerrainField {
     private int rain;
     private int sun;
     private int rabbits;
+    private int hunters;
 
     public TerrainField(int type) {
         this.terrainType = type;
@@ -81,6 +84,70 @@ public class TerrainField {
         return this.rabbits;
     }
 
+    public void updateHunters(RandomizedQueue<TerrainField> neighbourFields) {
+        if (this.hunters == 0) {
+            return;
+        }
+
+        int hungryHunters = this.hunters;
+        for (int i = 0; i < this.rabbits && i < this.hunters; ++i) {
+            this.dieRabbit();
+            --hungryHunters;
+        }
+
+        if (hungryHunters > 0) {
+            this.moveHunterToOtherTerrain(neighbourFields, hungryHunters);
+        }
+    }
+
+    private void moveHunterToOtherTerrain(RandomizedQueue<TerrainField> neighbourFields, int hungryHunters) {
+        int infinityLoopProtection = 123;
+        StdRandom.setSeed(System.currentTimeMillis());
+        while (hungryHunters > 0 && infinityLoopProtection > 0) {
+            --infinityLoopProtection;
+            int len = neighbourFields.size();
+            if (len == 0) {
+                return;
+            }
+            StdOut.println("len: " + Integer.toString(StdRandom.uniform(len)));
+            TerrainField field = neighbourFields.getItem(StdRandom.uniform(len));
+            if (field.getHunters() >= 3) {
+                continue;
+            }
+
+            int freePlacesForHunters = 3 - field.getHunters();
+            if (hungryHunters <= freePlacesForHunters) {
+                this.hunters -= hungryHunters;
+                field.addHunters(hungryHunters);
+                break;
+            } else {
+                this.hunters -= freePlacesForHunters;
+                hungryHunters -= freePlacesForHunters;
+                field.addHunters(freePlacesForHunters);
+            }
+        }
+
+
+/*        for (TerrainField field : neighbourFields) {
+            if (field.getHunters() >= 3 || field.getTerrainType() != TerrainField.MEADOW) {
+                continue;
+            }
+
+            int freePlacesForHunters = 3 - field.getHunters();
+            if (hungryHunters <= freePlacesForHunters) {
+                this.hunters -= hungryHunters;
+                field.addHunters(hungryHunters);
+                break;
+            } else {
+                this.hunters -= freePlacesForHunters;
+                hungryHunters -= freePlacesForHunters;
+                field.addHunters(freePlacesForHunters);
+            }
+        }*/
+    }
+
+    public int getHunters() { return this.hunters; }
+
     public int getRain() {
         return this.rain;
     }
@@ -115,6 +182,12 @@ public class TerrainField {
     public void setRabbits(int i) {
         if ((i >= 0) && (this.getTerrainType() == TerrainField.MEADOW)) {
             this.rabbits = Math.min(i, TerrainField.MAX_RABBITS);
+        }
+    }
+
+    public void setHunters(int i) {
+        if (i >= 0 && this.getTerrainType() == TerrainField.MEADOW) {
+            this.hunters = Math.min(i, TerrainField.MAX_HUNTERS);
         }
     }
 
@@ -153,6 +226,13 @@ public class TerrainField {
     private void addRabbit()
     {
         ++this.rabbits;
+    }
+
+    private void addHunters(int i) {
+        this.hunters += i;
+        if (this.hunters > 3) {
+            StdOut.println("Exception: more then 3 hunters!");
+        }
     }
 
     private void dieRabbit()

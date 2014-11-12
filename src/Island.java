@@ -82,6 +82,9 @@ public class Island {
                 //System.out.println("[" + Integer.toString(i) + "," + Integer.toString(j) + "] " + Boolean.toString(isNearWater(i, j)) + " type=" + Integer.toString(island[i][j].getTerrainType()));
                 island[i][j].updateTerrain( isNearWater(i, j) );
                 island[i][j].updateRabbits(this.getNeighboringFields(i, j));
+                if (island[i][j].getHunters() > 0) {
+                    island[i][j].updateHunters(this.getNeighboringFields(i, j));
+                }
             }
         }
     }

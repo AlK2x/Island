@@ -51,6 +51,10 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     }
 
+    public Item getItem(int i) {
+        return this.a[i];
+    }
+
     public Item sample() {
         if (N == 0) throw new NoSuchElementException();
         if (N == 1) return a[0];
@@ -68,6 +72,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         RandomizedQueuesIterator(Item[] item) {
             this.item = (Item[]) new Object[N];
             System.arraycopy(item, 0, this.item, 0, N);
+            StdRandom.setSeed(System.currentTimeMillis());
             StdRandom.shuffle(this.item);
         }
 

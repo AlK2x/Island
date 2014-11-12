@@ -45,6 +45,14 @@ public class IslandVisualizer {
         }
     }
 
+    private static void drawHunter(int col, int row, TerrainField field, int N) {
+        int hunters = field.getHunters();
+        if (hunters > 0)
+        {
+            StdDraw.text(col-0.35, N-row+0.25, Integer.toString(hunters) );
+        }
+    }
+
     public static void draw(Island island, int N) {
         StdDraw.clear();
         StdDraw.setPenColor(StdDraw.BLACK);
@@ -82,6 +90,7 @@ public class IslandVisualizer {
 
                 drawWeather(col, row, terrain.getRain(), terrain.getSun(), N);
                 drawRabbit(col, row, terrain, N);
+                drawHunter(col, row, terrain, N);
             }
         }
     }
@@ -91,7 +100,8 @@ public class IslandVisualizer {
         JComboBox combo = new JComboBox(items);
         combo.setSelectedIndex(field.getTerrainType() - 1);
         JTextField field1 = new JTextField(String.valueOf(field.getJuiciness()));
-        JTextField field2 = new JTextField(String.valueOf(field.getRabbits()));
+        JTextField fieldRabbits = new JTextField(String.valueOf(field.getRabbits()));
+        JTextField fieldHunter = new JTextField(String.valueOf(field.getHunters()));
 
 
         JPanel panel = new JPanel(new GridLayout(0, 1));
@@ -99,13 +109,16 @@ public class IslandVisualizer {
         panel.add(new JLabel("Трава:"));
         panel.add(field1);
         panel.add(new JLabel("Кролики:"));
-        panel.add(field2);
+        panel.add(fieldRabbits);
+        panel.add(new JLabel("Охотники: "));
+        panel.add(fieldHunter);
         int result = JOptionPane.showConfirmDialog(null, panel, "Тонкая настройка",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
             field.setTerrainType(combo.getSelectedIndex() + 1);
             field.setJuiciness(Integer.parseInt(field1.getText()));
-            field.setRabbits(Integer.parseInt(field2.getText()));
+            field.setRabbits(Integer.parseInt(fieldRabbits.getText()));
+            field.setHunters(Integer.parseInt(fieldHunter.getText()));
         } else {
             System.out.println("Cancelled");
         }
@@ -163,6 +176,21 @@ public class IslandVisualizer {
                             int rand = StdRandom.uniform(0, 15);
                             if (rand <= 3 ) {
                                 curr.setRabbits(rand);
+                            }
+                        }
+                    }
+                }
+                draw(island, N);
+            }
+
+            if (StdDraw.isKeyPressed(KeyEvent.VK_H)) {
+                for (int i = 0; i < N; ++i) {
+                    for (int j = 0; j < N; ++j) {
+                        TerrainField curr = island.getTerrainField(i + 1, j + 1);
+                        if (curr.getTerrainType() == TerrainField.MEADOW) {
+                            int rand = StdRandom.uniform(0, 15);
+                            if (rand <= 3 ) {
+                                curr.setHunters(rand);
                             }
                         }
                     }
