@@ -41,7 +41,7 @@ public class IslandVisualizer {
         int rabbits = field.getRabbits();
         if (rabbits > 0)
         {
-            StdDraw.picture(col-0.35, N-row+0.25, "images/rabbit0" + Integer.toString(rabbits) + ".png", 0.35 + rabbits * 0.07 , 0.35 + rabbits * 0.05 );
+            StdDraw.picture(col-0.25, N-row+0.25, "images/rabbit0" + Integer.toString(rabbits) + ".png", 0.47 , 0.47 );
         }
     }
 
@@ -49,7 +49,7 @@ public class IslandVisualizer {
         int hunters = field.getHunters();
         if (hunters > 0)
         {
-            StdDraw.text(col-0.35, N-row+0.25, Integer.toString(hunters) );
+            StdDraw.picture(col-0.75, N-row+0.25, "images/hunter0" + Integer.toString(hunters) + ".png", 0.45, 0.45 );
         }
     }
 
