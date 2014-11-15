@@ -13,6 +13,7 @@ public class IslandVisualizer {
     // delay in miliseconds (controls animation speed)
     private static final int DELAY = 1000;
     private static final int RESOLUTION = 800;
+    private static final double ICON_SCALE = 0.30;
     private static boolean lockedMouse = false;
 
     // draw N-by-N percolation system
@@ -27,11 +28,11 @@ public class IslandVisualizer {
     public static void drawWeather(int col, int row, int rainState, int sunState, int N) {
         if (rainState > 0)
         {
-            StdDraw.picture(col-0.75, N-row+0.75,"images/rain0" + Integer.toString(rainState) + ".png", 0.47, 0.47);
+            StdDraw.picture(col-0.75, N-row+0.75,"images/rain0" + Integer.toString(rainState) + ".png", ICON_SCALE, ICON_SCALE);
         }
         if (sunState > 0)
         {
-            StdDraw.picture(col-0.25, N-row+0.75,"images/sun0" + Integer.toString(sunState) + ".png", 0.47, 0.47);
+            StdDraw.picture(col-0.25, N-row+0.75,"images/sun0" + Integer.toString(sunState) + ".png", ICON_SCALE, ICON_SCALE);
         }
 
     }
@@ -41,7 +42,7 @@ public class IslandVisualizer {
         int rabbits = field.getRabbits();
         if (rabbits > 0)
         {
-            StdDraw.picture(col-0.25, N-row+0.25, "images/rabbit0" + Integer.toString(rabbits) + ".png", 0.47 , 0.47 );
+            StdDraw.picture(col-0.48, N-row+0.5, "images/rabbit0" + Integer.toString(rabbits) + ".png", ICON_SCALE, ICON_SCALE);
         }
     }
 
@@ -49,11 +50,20 @@ public class IslandVisualizer {
         int hunters = field.getHunters();
         if (hunters > 0)
         {
-            StdDraw.picture(col-0.75, N-row+0.25, "images/hunter0" + Integer.toString(hunters) + ".png", 0.45, 0.45 );
+            StdDraw.picture(col-0.75, N-row+0.25, "images/hunter0" + Integer.toString(hunters) + ".png", ICON_SCALE + 0.05, ICON_SCALE + 0.05 );
+        }
+    }
+
+    private static void drawWolf(int col, int row, TerrainField field, int N) {
+        int hunters = field.getHunters();
+        if (hunters > 0)
+        {
+            StdDraw.picture(col-0.25, N-row+0.25, "images/wolf0" + Integer.toString(hunters) + ".png", ICON_SCALE + 0.05, ICON_SCALE + 0.05 );
         }
     }
 
     public static void draw(Island island, int N) {
+        System.out.println("draw");
         StdDraw.clear();
         StdDraw.setPenColor(StdDraw.BLACK);
         StdDraw.setXscale(0, N);
@@ -91,6 +101,7 @@ public class IslandVisualizer {
                 drawWeather(col, row, terrain.getRain(), terrain.getSun(), N);
                 drawRabbit(col, row, terrain, N);
                 drawHunter(col, row, terrain, N);
+                drawWolf(col, row, terrain, N);
             }
         }
     }
@@ -99,26 +110,38 @@ public class IslandVisualizer {
         String[] items = {"ВОДА", "ГОРЫ", "ЛУГ"};
         JComboBox combo = new JComboBox(items);
         combo.setSelectedIndex(field.getTerrainType() - 1);
+        JTextField fieldSun = new JTextField(String.valueOf(field.getSun()));
+        JTextField fieldRain = new JTextField(String.valueOf(field.getRain()));
         JTextField field1 = new JTextField(String.valueOf(field.getJuiciness()));
         JTextField fieldRabbits = new JTextField(String.valueOf(field.getRabbits()));
         JTextField fieldHunter = new JTextField(String.valueOf(field.getHunters()));
-
+        JTextField fieldWolves = new JTextField(String.valueOf(field.getWolves()));
 
         JPanel panel = new JPanel(new GridLayout(0, 1));
         panel.add(combo);
+        panel.add(new JLabel("Сонце:"));
+        panel.add(fieldSun);
+        panel.add(new JLabel("Дождь:"));
+        panel.add(fieldRain);
         panel.add(new JLabel("Трава:"));
         panel.add(field1);
         panel.add(new JLabel("Кролики:"));
         panel.add(fieldRabbits);
         panel.add(new JLabel("Охотники: "));
         panel.add(fieldHunter);
+        panel.add(new JLabel("Волки: "));
+        panel.add(fieldWolves);
         int result = JOptionPane.showConfirmDialog(null, panel, "Тонкая настройка",
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result == JOptionPane.OK_OPTION) {
-            field.setTerrainType(combo.getSelectedIndex() + 1);
+            field.setSun(Integer.parseInt(fieldSun.getText()));
+            field.setRain(Integer.parseInt(fieldRain.getText()));
             field.setJuiciness(Integer.parseInt(field1.getText()));
             field.setRabbits(Integer.parseInt(fieldRabbits.getText()));
             field.setHunters(Integer.parseInt(fieldHunter.getText()));
+            field.setWolves(Integer.parseInt(fieldWolves.getText()));
+            field.setTerrainType(combo.getSelectedIndex() + 1);
+            System.out.println("OK_OPTION");
         } else {
             System.out.println("Cancelled");
         }
@@ -146,7 +169,7 @@ public class IslandVisualizer {
         //StdDraw.show(0);
 
         // repeatedly read in sites to open and draw resulting system
-        int N = 6;
+        int N = 4;
         Island island = new Island(N);
         island.setLifeTime(42);
         //StdDraw.show(0);
@@ -157,6 +180,7 @@ public class IslandVisualizer {
 
         while (true) {
             if (StdDraw.isKeyPressed(KeyEvent.VK_RIGHT)) {
+                System.out.println("tickTack");
                 island.tickTack();
                 draw(island, N);
             }
@@ -168,7 +192,7 @@ public class IslandVisualizer {
                 lockedMouse = true;
             }
 
-            if (StdDraw.isKeyPressed(KeyEvent.VK_Q)) {
+            if (StdDraw.isKeyPressed(KeyEvent.VK_R)) {
                 for (int i = 0; i < N; ++i) {
                     for (int j = 0; j < N; ++j) {
                         TerrainField curr = island.getTerrainField(i + 1, j + 1);
@@ -198,6 +222,21 @@ public class IslandVisualizer {
                 draw(island, N);
             }
 
+            if (StdDraw.isKeyPressed(KeyEvent.VK_W)) {
+                for (int i = 0; i < N; ++i) {
+                    for (int j = 0; j < N; ++j) {
+                        TerrainField curr = island.getTerrainField(i + 1, j + 1);
+                        if (curr.getTerrainType() == TerrainField.MEADOW) {
+                            int rand = StdRandom.uniform(0, 15);
+                            if (rand <= 3 ) {
+                                curr.setWolves(rand);
+                            }
+                        }
+                    }
+                }
+                draw(island, N);
+            }
+
             if (StdDraw.isKeyPressed(KeyEvent.VK_ENTER) && lockedMouse)
             {
                 try {
@@ -211,6 +250,12 @@ public class IslandVisualizer {
                     lockedMouse = false;
                     continue;
                 }
+            }
+
+            if (StdDraw.isKeyPressed(KeyEvent.VK_N)) {
+                island = null;
+                island = new Island(N);
+                draw(island, N);
             }
 
             StdDraw.show(250);

@@ -1,10 +1,32 @@
-import java.util.Set;
+import java.util.Stack;
+import java.util.Vector;
 
-public class Island {
+public class Island implements Cloneable{
 
     private int N;
     private TerrainField[][] island;
     private int time;
+
+    private static class Direction {
+        int dx, dy;
+
+        public Direction(int i, int j )
+        {
+            this.dx = i;
+            this.dy = j;
+        }
+    }
+
+    private Direction TOP = new Direction(-1, 0);
+    private Direction TOP_RIGHT = new Direction(-1, 1);
+    private Direction RIGHT = new Direction(0, 1);
+    private Direction BOTTOM_RIGHT = new Direction(1, 1);
+    private Direction BOTTOM = new Direction(1, 0);
+    private Direction BOTTOM_LEFT = new Direction(1, -1);
+    private Direction LEFT = new Direction(0, -1);
+    private Direction TOP_LEFT = new Direction(-1, -1);
+
+    private Direction[] DIRECTIONS = { TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT, LEFT, TOP_LEFT };
 
     public Island(int N) {
         this.N = N;
@@ -49,50 +71,77 @@ public class Island {
         return terrainType;
     }
 
-    private RandomizedQueue<TerrainField> getNeighboringFields(int i, int j) {
-        RandomizedQueue<TerrainField> neighboringFields = new RandomizedQueue<TerrainField>();
-        TerrainField tempField;
-        try {
-            if (this.getTerrainField(i + 1, j).getTerrainType() == TerrainField.MEADOW) {
-                neighboringFields.enqueue(this.getTerrainField(i + 1, j));
-            }
-        } catch (IndexOutOfBoundsException e) {}
-        try {
-            if (this.getTerrainField(i - 1, j).getTerrainType() == TerrainField.MEADOW) {
-                neighboringFields.enqueue(this.getTerrainField(i - 1, j));
-            }
-        } catch (IndexOutOfBoundsException e) {}
-        try {
-            if (this.getTerrainField(i, j + 1).getTerrainType() == TerrainField.MEADOW) {
-                neighboringFields.enqueue(this.getTerrainField(i, j + 1));
-            }
-        } catch (IndexOutOfBoundsException e) {}
-        try {
-            if (this.getTerrainField(i, j - 1).getTerrainType() == TerrainField.MEADOW) {
-                neighboringFields.enqueue(this.getTerrainField(i, j - 1));
-            }
-        } catch (IndexOutOfBoundsException e) {}
-
-        return neighboringFields;
-    }
-
     private void updateIsland() {
         for (int i = 0; i < this.N; ++i) {
             for (int j = 0; j < this.N; ++j) {
                 //System.out.println("[" + Integer.toString(i) + "," + Integer.toString(j) + "] " + Boolean.toString(isNearWater(i, j)) + " type=" + Integer.toString(island[i][j].getTerrainType()));
-                island[i][j].updateTerrain( isNearWater(i, j) );
-                island[i][j].updateRabbits(this.getNeighboringFields(i, j));
-                if (island[i][j].getHunters() > 0) {
+                /*island[i][j].resetDelta();*/
+                System.out.println("updateRabbits " + i + " " + j);
+                this.updateRabbits(i , j);
+                /*if (island[i][j].getHunters() > 0) {
                     island[i][j].updateHunters(this.getNeighboringFields(i, j));
-                }
+                }*/
+                System.out.println("updateTerrain " + i + " " + j);
+                island[i][j].updateTerrain( isNearWater(i, j) );
             }
         }
+
+        for (int i = 0; i < this.N; ++i) {
+            for (int j = 0; j < this.N; ++j) {
+                island[i][j].applyDeltas();
+                island[i][j].resetDeltas();
+            }
+        }
+    }
+
+    private void updateRabbits(int i, int j)
+    {
+        int hungryRabbits = island[i][j].rabbitsNeedMoveCount();
+        if ( hungryRabbits > 0)
+        {
+            for (int it = 1; it <= hungryRabbits; ++it)
+            {
+                this.moveRabbit(i ,j);
+            }
+        }
+        island[i][j].rabbitsEatsGrass();
+        island[i][j].rabbitsReproduction();
+    }
+
+    private void moveRabbit(int i, int j)
+    {
+        System.out.println("current i j = " + i + " " + j);
+        Vector<Direction> availableDirVector = new Vector<Direction>();
+        availableDirVector.clear();
+        for (int it = 0; it < DIRECTIONS.length; ++it)
+        {
+            int currRow = i + DIRECTIONS[it].dx;
+            int currCol = j + DIRECTIONS[it].dy;
+            System.out.println("potential point " + currRow + " " + currCol);
+            if (isCorrectCoordinate(currRow, currCol) && island[ currRow ][ currCol ].isAvailableForRabbit())
+            {
+                System.out.println("available because");
+                System.out.println("  rabbits=" + island[ currRow ][ currCol ].getRabbits() + "; juic=" + island[ currRow ][ currCol ].getJuiciness() + "; deltaRabbit=" + island[ currRow ][ currCol ].deltaRabbit);
+                availableDirVector.add( DIRECTIONS[it] );
+            }
+        }
+        island[i][j].dieRabbit(); //Кролик из текущей клетки изымается в любом случае
+        if (!availableDirVector.isEmpty())
+        {
+            int dirCount = availableDirVector.size();
+            int randDirNum = dirCount > 1 ? StdRandom.uniform(0, dirCount - 1) : 0 ;
+            Direction randDir = availableDirVector.get(randDirNum);
+            int newRow = i + randDir.dx;
+            int newCol = j + randDir.dy;
+            island[newRow][newCol].addRabbit();
+        }
+
     }
 
     private boolean isNearWater(int row, int col) {
         for (int i = row - 1; i <= row + 1; ++i) {
             for (int j = col - 1; j <= col + 1; ++j) {
-                if ( !((i == row) && (j == col)) && (i >= 0) && (i < this.N) && (j >= 0) && (j < this.N)) {
+                if ( !((i == row) && (j == col)) && isCorrectCoordinate(i, j) ) {
                     if (island[i][j].getTerrainType() == TerrainField.WATER) {
                         return true;
                     }
@@ -100,5 +149,16 @@ public class Island {
             }
         }
         return false;
+    }
+
+    private boolean isCorrectCoordinate(int i, int j) {
+        if ( (i >= 0) && (i < this.N) && (j >= 0) && (j < this.N) ) {
+            return true;
+        }
+        return false;
+    }
+
+    public Island clone() throws CloneNotSupportedException {
+        return (Island)super.clone();
     }
 }

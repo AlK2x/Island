@@ -5,9 +5,12 @@ public class TerrainField {
     public static final int WATER = 1;
     public static final int MOUNT = 2;
     public static final int MEADOW = 3;
-    public static final int MAX_JUCINESS = 5;
+    public static final int MAX_SUN = 3;
+    public static final int MAX_RAIN = 3;
+    public static final int MAX_JUICINESS = 5;
     public static final int MAX_RABBITS = 3;
     public static final int MAX_HUNTERS = 3;
+    public static final int MAX_WOLVES = 3;
 
 
     private int terrainType;
@@ -16,13 +19,17 @@ public class TerrainField {
     private int sun;
     private int rabbits;
     private int hunters;
+    private int wolves;
+
+    private int deltaJuiciness;
+    public int deltaRabbit;
+    private int deltaHunter;
+    private int deltaWolf;
 
     public TerrainField(int type) {
         this.terrainType = type;
-        this.juiciness = 0;
-        this.rain = 0;
-        this.sun = 0;
-        this.rabbits = 0;
+        this.resetMembers();
+        this.resetDeltas();
         this.changeWeather();
     }
 
@@ -35,126 +42,24 @@ public class TerrainField {
         }
     }
 
-    public void updateRabbits(RandomizedQueue<TerrainField> neighbourFields) {
-        if (this.isNeedUpdateRabbits()) {
-            if (this.rabbits > this.juiciness) {
-                int refugees = Math.abs(this.rabbits - this.juiciness);
-                for (TerrainField field : neighbourFields)
-                {
-                    if (field.hasPlaceForRabbit())
-                    {
-                        int numPlacesForRabbit = 3 - field.getRabbits();
-                        int diff = refugees - numPlacesForRabbit;
-                        if (diff <= 0)
-                        {
-                            field.setRabbits(field.getRabbits() + refugees);
-                            this.juiciness -= refugees;
-                            break;
-                        }
-                        else
-                        {
-                            field.setRabbits(field.getRabbits() + diff);
-                            this.juiciness -= diff;
-                            refugees = diff;
-                        }
-                    }
-                }
-                if (refugees > 0)
-                {
-                    while (refugees != 0)
-                    {
-                        this.dieRabbit();
-                        --refugees;
-                    }
-                }
-            }
-            this.rabbitEatTheGrass();
-            if (this.rabbits == 2) {
-                this.addRabbit();
-            }
-        }
-    }
-
     public boolean hasPlaceForRabbit()
     {
         return this.juiciness > 0 && this.rabbits < 3;
     }
 
-    public int getRabbits() {
-        return this.rabbits;
-    }
-
-    public void updateHunters(RandomizedQueue<TerrainField> neighbourFields) {
-        if (this.hunters == 0) {
-            return;
-        }
-
-        int hungryHunters = this.hunters;
-        for (int i = 0; i < this.rabbits && i < this.hunters; ++i) {
-            this.dieRabbit();
-            --hungryHunters;
-        }
-
-        if (hungryHunters > 0) {
-            this.moveHunterToOtherTerrain(neighbourFields, hungryHunters);
-        }
-    }
-
-    private void moveHunterToOtherTerrain(RandomizedQueue<TerrainField> neighbourFields, int hungryHunters) {
-        int infinityLoopProtection = 123;
-        StdRandom.setSeed(System.currentTimeMillis());
-        while (hungryHunters > 0 && infinityLoopProtection > 0) {
-            --infinityLoopProtection;
-            int len = neighbourFields.size();
-            if (len == 0) {
-                return;
-            }
-            StdOut.println("len: " + Integer.toString(StdRandom.uniform(len)));
-            TerrainField field = neighbourFields.getItem(StdRandom.uniform(len));
-            if (field.getHunters() >= 3) {
-                continue;
-            }
-
-            int freePlacesForHunters = 3 - field.getHunters();
-            if (hungryHunters <= freePlacesForHunters) {
-                this.hunters -= hungryHunters;
-                field.addHunters(hungryHunters);
-                break;
-            } else {
-                this.hunters -= freePlacesForHunters;
-                hungryHunters -= freePlacesForHunters;
-                field.addHunters(freePlacesForHunters);
-            }
-        }
-
-
-/*        for (TerrainField field : neighbourFields) {
-            if (field.getHunters() >= 3 || field.getTerrainType() != TerrainField.MEADOW) {
-                continue;
-            }
-
-            int freePlacesForHunters = 3 - field.getHunters();
-            if (hungryHunters <= freePlacesForHunters) {
-                this.hunters -= hungryHunters;
-                field.addHunters(hungryHunters);
-                break;
-            } else {
-                this.hunters -= freePlacesForHunters;
-                hungryHunters -= freePlacesForHunters;
-                field.addHunters(freePlacesForHunters);
-            }
-        }*/
-    }
+    public int getRabbits() { return this.rabbits; }
 
     public int getHunters() { return this.hunters; }
 
-    public int getRain() {
-        return this.rain;
+    public int getWolves() { return this.wolves; }
+
+    public int getJuiciness() {
+        return this.juiciness;
     }
 
-    public int getSun() {
-        return this.sun;
-    }
+    public int getRain() { return this.rain; }
+
+    public int getSun() { return this.sun; }
 
     public int getTerrainType() {
         return this.terrainType;
@@ -163,19 +68,33 @@ public class TerrainField {
     public void setTerrainType(int type) {
         this.terrainType = type;
         if ( type != TerrainField.MEADOW ) {
-            this.setSun(0);
-            this.setRain(0);
-            this.setRabbits(0);
+            this.resetMembers();
         }
     }
 
-    public int getJuiciness() {
-        return this.juiciness;
+    public void resetMembers() {
+        this.juiciness = 0;
+        this.sun = 0;
+        this.rain = 0;
+        this.rabbits = 0;
+        this.hunters = 0;
+        this.wolves = 0;
+        this.resetDeltas();
     }
+
+
+    public void resetDeltas()
+    {
+        this.deltaJuiciness = 0;
+        this.deltaRabbit = 0;
+        this.deltaHunter = 0;
+        this.deltaWolf = 0;
+    }
+
 
     public void setJuiciness(int i) {
         if (i >= 0) {
-            this.juiciness = Math.min(i, TerrainField.MAX_JUCINESS);
+            this.juiciness = Math.min(i, TerrainField.MAX_JUICINESS);
         }
     }
 
@@ -191,10 +110,109 @@ public class TerrainField {
         }
     }
 
+    public void setWolves(int i) {
+        if (i >= 0 && this.getTerrainType() == TerrainField.MEADOW) {
+            this.wolves = Math.min(i, TerrainField.MAX_WOLVES);
+        }
+    }
 
-    public void setSun(int i) { this.sun = i; }
 
-    public void setRain(int i) { this.rain = i; }
+    public void setSun(int i) {
+        if (i >= 0 && this.getTerrainType() == TerrainField.MEADOW) {
+            this.sun = Math.min(i, TerrainField.MAX_SUN);
+        }
+    }
+
+    public void setRain(int i) {
+        if (i >= 0 && this.getTerrainType() == TerrainField.MEADOW) {
+            this.rain = Math.min(i, TerrainField.MAX_RAIN);
+        }
+    }
+
+    public int rabbitsNeedMoveCount()
+    {
+        int hungryRabbits = this.getRabbits() - this.getJuiciness();
+        return hungryRabbits;
+    }
+
+    public boolean isAvailableForRabbit()
+    {
+        if ( (this.getTerrainType() == MEADOW) && (this.getJuiciness() > 0) && ((this.getRabbits() + this.deltaRabbit) < MAX_RABBITS) )
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public void rabbitsEatsGrass()
+    {
+        for (int i = 1; i <= this.getRabbits(); ++i)
+        {
+            this.grassDie(); System.out.println("grass die");
+        }
+    }
+
+    public void rabbitsReproduction()
+    {
+        if (this.getRabbits() == 2)
+        {
+            this.addRabbit();
+        }
+    }
+
+    public void applyDeltas()
+    {
+        this.applyDeltaJuiciness();
+        this.applyDeltaRabbit();
+        this.applyDeltaHunter();
+        this.applyDeltaWolves();
+    }
+
+    private void applyDeltaJuiciness()
+    {
+        this.addJuiciness( this.deltaJuiciness );
+    }
+
+    private void applyDeltaRabbit()
+    {
+        this.addRabbit( this.deltaRabbit );
+    }
+
+    private void applyDeltaHunter()
+    {
+        this.addHunters( this.deltaHunter );
+    }
+
+    private void applyDeltaWolves()
+    {
+        this.addWolves( this.deltaWolf );
+    }
+
+    private void addJuiciness( int delta )
+    {
+        this.juiciness += delta;
+        if (this.juiciness < 0) this.juiciness = 0;
+        if (this.juiciness > MAX_JUICINESS) this.juiciness = MAX_JUICINESS;
+    }
+
+    private void addRabbit( int delta )
+    {
+        this.rabbits += delta;
+        if (this.rabbits < 0) this.rabbits = 0;
+        if (this.rabbits > MAX_RABBITS) this.rabbits = MAX_RABBITS;
+    }
+
+    private void addHunters( int delta) {
+        this.hunters += delta;
+        if (this.hunters < 0) this.hunters = 0;
+        if (this.hunters > MAX_HUNTERS) this.hunters = MAX_HUNTERS;
+    }
+
+    private void addWolves( int delta) {
+        this.wolves += delta;
+        if (this.wolves < 0) this.wolves = 0;
+        if (this.wolves > MAX_WOLVES) this.wolves = MAX_WOLVES;
+    }
 
     private boolean isNeedUpdateRabbits() {
         return (this.rabbits >= 2) || (this.rabbits > this.juiciness);
@@ -212,35 +230,21 @@ public class TerrainField {
     }
 
     private void grassDie() {
-        if (this.juiciness > 0) {
-            --this.juiciness;
-        }
+        --this.deltaJuiciness;
     }
 
     public void grassGrow() {
-        if (this.juiciness < TerrainField.MAX_JUCINESS) {
-            ++this.juiciness;
-        }
+        ++this.deltaJuiciness;
     }
 
-    private void addRabbit()
+    public void dieRabbit()
     {
-        ++this.rabbits;
+        --this.deltaRabbit;
     }
 
-    private void addHunters(int i) {
-        this.hunters += i;
-        if (this.hunters > 3) {
-            StdOut.println("Exception: more then 3 hunters!");
-        }
-    }
-
-    private void dieRabbit()
+    public void addRabbit()
     {
-        if (this.rabbits > 0)
-        {
-            --this.rabbits;
-        }
+        ++this.deltaRabbit;
     }
 
     private void changeMeadow(boolean isNearWater) {
@@ -285,4 +289,6 @@ public class TerrainField {
             this.rain = 0;
         }
     }
+
+
 }
