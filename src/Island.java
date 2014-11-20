@@ -76,18 +76,20 @@ public class Island implements Cloneable{
             for (int j = 0; j < this.N; ++j) {
                 //System.out.println("[" + Integer.toString(i) + "," + Integer.toString(j) + "] " + Boolean.toString(isNearWater(i, j)) + " type=" + Integer.toString(island[i][j].getTerrainType()));
                 /*island[i][j].resetDelta();*/
-                System.out.println("updateRabbits " + i + " " + j);
-                this.updateRabbits(i , j);
+                //System.out.println("updateRabbits " + i + " " + j);
+                this.updateRabbits(i, j);
+                this.updateHunters(i, j);
                 /*if (island[i][j].getHunters() > 0) {
                     island[i][j].updateHunters(this.getNeighboringFields(i, j));
                 }*/
-                System.out.println("updateTerrain " + i + " " + j);
+                //System.out.println("updateTerrain " + i + " " + j);
                 island[i][j].updateTerrain( isNearWater(i, j) );
             }
         }
 
         for (int i = 0; i < this.N; ++i) {
             for (int j = 0; j < this.N; ++j) {
+                System.out.println("ApplyDeltas " + i + " " + j);
                 island[i][j].applyDeltas();
                 island[i][j].resetDeltas();
             }
@@ -97,7 +99,7 @@ public class Island implements Cloneable{
     private void updateRabbits(int i, int j)
     {
         int hungryRabbits = island[i][j].rabbitsNeedMoveCount();
-        if ( hungryRabbits > 0)
+        if ( hungryRabbits > 0 )
         {
             for (int it = 1; it <= hungryRabbits; ++it)
             {
@@ -110,32 +112,71 @@ public class Island implements Cloneable{
 
     private void moveRabbit(int i, int j)
     {
-        System.out.println("current i j = " + i + " " + j);
+        //System.out.println("current i j = " + i + " " + j);
         Vector<Direction> availableDirVector = new Vector<Direction>();
         availableDirVector.clear();
         for (int it = 0; it < DIRECTIONS.length; ++it)
         {
             int currRow = i + DIRECTIONS[it].dx;
             int currCol = j + DIRECTIONS[it].dy;
-            System.out.println("potential point " + currRow + " " + currCol);
+            //System.out.println("potential point " + currRow + " " + currCol);
             if (isCorrectCoordinate(currRow, currCol) && island[ currRow ][ currCol ].isAvailableForRabbit())
             {
-                System.out.println("available because");
-                System.out.println("  rabbits=" + island[ currRow ][ currCol ].getRabbits() + "; juic=" + island[ currRow ][ currCol ].getJuiciness() + "; deltaRabbit=" + island[ currRow ][ currCol ].deltaRabbit);
                 availableDirVector.add( DIRECTIONS[it] );
             }
         }
         island[i][j].dieRabbit(); //Кролик из текущей клетки изымается в любом случае
         if (!availableDirVector.isEmpty())
         {
-            int dirCount = availableDirVector.size();
-            int randDirNum = dirCount > 1 ? StdRandom.uniform(0, dirCount - 1) : 0 ;
-            Direction randDir = availableDirVector.get(randDirNum);
-            int newRow = i + randDir.dx;
-            int newCol = j + randDir.dy;
-            island[newRow][newCol].addRabbit();
+            Direction randDir = getRandomDirection( availableDirVector );
+
+            island[i + randDir.dx][j + randDir.dy].addRabbit();
         }
 
+    }
+
+    private void updateHunters(int i, int j)
+    {
+        int unsatisfiedHunters = island[i][j].getUnsatisfiedHunters();
+        if ( unsatisfiedHunters > 0 )
+        {
+            for (int it = 1; it <= unsatisfiedHunters; ++it)
+            {
+                this.moveHunter(i ,j);
+            }
+        }
+
+        //island[i][j].rabbitsEatsGrass();
+        //island[i][j].rabbitsReproduction();
+    }
+
+    private void moveHunter(int i, int j)
+    {
+        Vector<Direction> availableDirVector = new Vector<Direction>();
+        availableDirVector.clear();
+        for (int it = 0; it < DIRECTIONS.length; ++it)
+        {
+            int currRow = i + DIRECTIONS[it].dx;
+            int currCol = j + DIRECTIONS[it].dy;
+            //System.out.println("potential point " + currRow + " " + currCol);
+            if (isCorrectCoordinate(currRow, currCol) && island[ currRow ][ currCol ].isAvailableForHunter())
+            {
+                availableDirVector.add( DIRECTIONS[it] );
+            }
+        }
+        if (!availableDirVector.isEmpty())
+        {
+            Direction randDir = getRandomDirection( availableDirVector );
+            island[i][j].removeHunter();
+            island[i + randDir.dx][j + randDir.dy].addHunter();
+        }
+    }
+
+    private Direction getRandomDirection(Vector<Direction> vector)
+    {
+        int dirCount = vector.size();
+        int randDirNum = dirCount > 1 ? (int) Math.round( Math.random() * (dirCount - 1) ) : 0 ; // magic, magic!
+        return vector.get(randDirNum);
     }
 
     private boolean isNearWater(int row, int col) {

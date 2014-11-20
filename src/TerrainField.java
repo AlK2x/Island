@@ -23,8 +23,8 @@ public class TerrainField {
 
     private int deltaJuiciness;
     public int deltaRabbit;
-    private int deltaHunter;
-    private int deltaWolf;
+    public int deltaHunter;
+    public int deltaWolf;
 
     public TerrainField(int type) {
         this.terrainType = type;
@@ -40,11 +40,6 @@ public class TerrainField {
             this.changeWeather();
 
         }
-    }
-
-    public boolean hasPlaceForRabbit()
-    {
-        return this.juiciness > 0 && this.rabbits < 3;
     }
 
     public int getRabbits() { return this.rabbits; }
@@ -137,7 +132,28 @@ public class TerrainField {
 
     public boolean isAvailableForRabbit()
     {
-        if ( (this.getTerrainType() == MEADOW) && (this.getJuiciness() > 0) && ((this.getRabbits() + this.deltaRabbit) < MAX_RABBITS) )
+        int rabbitCountTomorrow = (this.getRabbits() + this.deltaRabbit);
+        boolean isFoodAvailable = (this.getJuiciness() - rabbitCountTomorrow) > 0;
+        boolean isMaxRabbitCountAchieved = rabbitCountTomorrow < MAX_RABBITS;
+        if ( (this.getTerrainType() == MEADOW) && (this.getJuiciness() > 0) && isFoodAvailable && isMaxRabbitCountAchieved )
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public int getUnsatisfiedHunters()
+    {
+        int unsatisfiedHunters = this.getHunters() - this.getRabbits();
+        return unsatisfiedHunters;
+    }
+
+    public boolean isAvailableForHunter()
+    {
+        int hunterCountTomorrow = (this.getHunters() + this.deltaHunter);
+
+        boolean isMaxHunterCountAchieved = hunterCountTomorrow < MAX_RABBITS;
+        if ( (this.getTerrainType() == MEADOW) && isMaxHunterCountAchieved )
         {
             return true;
         }
@@ -173,15 +189,9 @@ public class TerrainField {
         this.addJuiciness( this.deltaJuiciness );
     }
 
-    private void applyDeltaRabbit()
-    {
-        this.addRabbit( this.deltaRabbit );
-    }
+    private void applyDeltaRabbit() { this.addRabbit( this.deltaRabbit ); }
 
-    private void applyDeltaHunter()
-    {
-        this.addHunters( this.deltaHunter );
-    }
+    private void applyDeltaHunter() { this.addHunters( this.deltaHunter ); }
 
     private void applyDeltaWolves()
     {
@@ -214,15 +224,6 @@ public class TerrainField {
         if (this.wolves > MAX_WOLVES) this.wolves = MAX_WOLVES;
     }
 
-    private boolean isNeedUpdateRabbits() {
-        return (this.rabbits >= 2) || (this.rabbits > this.juiciness);
-    }
-
-    private void rabbitEatTheGrass()
-    {
-        this.juiciness = ((juiciness - this.rabbits)) >= 0 ? juiciness - this.rabbits : 0;
-    }
-
     private void changeWeather() {
         if (this.getTerrainType() == TerrainField.MEADOW) {
             this.generateWeather();
@@ -237,15 +238,16 @@ public class TerrainField {
         ++this.deltaJuiciness;
     }
 
-    public void dieRabbit()
-    {
-        --this.deltaRabbit;
-    }
+    public void dieRabbit() { --this.deltaRabbit; }
 
     public void addRabbit()
     {
         ++this.deltaRabbit;
     }
+
+    public void removeHunter() { --this.deltaHunter; }
+
+    public void addHunter() { ++this.deltaHunter; }
 
     private void changeMeadow(boolean isNearWater) {
         if (this.sun == 0) {

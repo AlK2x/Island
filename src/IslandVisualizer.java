@@ -55,10 +55,10 @@ public class IslandVisualizer {
     }
 
     private static void drawWolf(int col, int row, TerrainField field, int N) {
-        int hunters = field.getHunters();
-        if (hunters > 0)
+        int wolves = field.getWolves();
+        if (wolves > 0)
         {
-            StdDraw.picture(col-0.25, N-row+0.25, "images/wolf0" + Integer.toString(hunters) + ".png", ICON_SCALE + 0.05, ICON_SCALE + 0.05 );
+            StdDraw.picture(col-0.25, N-row+0.25, "images/wolf0" + Integer.toString(wolves) + ".png", ICON_SCALE + 0.05, ICON_SCALE + 0.05 );
         }
     }
 
@@ -169,7 +169,7 @@ public class IslandVisualizer {
         //StdDraw.show(0);
 
         // repeatedly read in sites to open and draw resulting system
-        int N = 4;
+        int N = 2;
         Island island = new Island(N);
         island.setLifeTime(42);
         //StdDraw.show(0);
