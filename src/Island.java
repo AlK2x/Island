@@ -74,15 +74,10 @@ public class Island implements Cloneable{
     private void updateIsland() {
         for (int i = 0; i < this.N; ++i) {
             for (int j = 0; j < this.N; ++j) {
-                //System.out.println("[" + Integer.toString(i) + "," + Integer.toString(j) + "] " + Boolean.toString(isNearWater(i, j)) + " type=" + Integer.toString(island[i][j].getTerrainType()));
-                /*island[i][j].resetDelta();*/
-                //System.out.println("updateRabbits " + i + " " + j);
+
                 this.updateRabbits(i, j);
                 this.updateHunters(i, j);
-                /*if (island[i][j].getHunters() > 0) {
-                    island[i][j].updateHunters(this.getNeighboringFields(i, j));
-                }*/
-                //System.out.println("updateTerrain " + i + " " + j);
+
                 island[i][j].updateTerrain( isNearWater(i, j) );
             }
         }
