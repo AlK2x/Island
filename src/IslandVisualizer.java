@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 public class IslandVisualizer {
 
     // delay in miliseconds (controls animation speed)
+    private static final int ISLAND_SIZE = 4;
     private static final int DELAY = 1000;
     private static final int RESOLUTION = 800;
     private static final double ICON_SCALE = 0.30;
@@ -169,7 +170,7 @@ public class IslandVisualizer {
         //StdDraw.show(0);
 
         // repeatedly read in sites to open and draw resulting system
-        int N = 2;
+        int N = ISLAND_SIZE;
         Island island = new Island(N);
         island.setLifeTime(42);
         //StdDraw.show(0);

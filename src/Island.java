@@ -3,7 +3,7 @@ import java.util.Vector;
 
 public class Island implements Cloneable{
 
-    private int N;
+    private int N = 4;
     private TerrainField[][] island;
     private int time;
 
