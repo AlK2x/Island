@@ -75,8 +75,8 @@ public class Island implements Cloneable{
         for (int i = 0; i < this.N; ++i) {
             for (int j = 0; j < this.N; ++j) {
 
-                this.updateRabbits(i, j);
                 this.updateHunters(i, j);
+                this.updateRabbits(i, j);
 
                 island[i][j].updateTerrain( isNearWater(i, j) );
             }
