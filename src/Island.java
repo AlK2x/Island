@@ -47,10 +47,6 @@ public class Island implements Cloneable{
         this.time = time;
     }
 
-    public boolean isEndOfTime() {
-        return this.time == 0;
-    }
-
     public void tickTack() {
         --time;
         this.updateIsland();
@@ -75,8 +71,11 @@ public class Island implements Cloneable{
         for (int i = 0; i < this.N; ++i) {
             for (int j = 0; j < this.N; ++j) {
 
-                this.updateHunters(i, j);
-                this.updateRabbits(i, j);
+                this.moveHunters(i, j);                 // if wolves doesn't exists
+                island[i][j].rabbitsReproduction();
+                island[i][j].huntersKillsRabbits();     // if wolves doesn't exists
+                this.moveRabbits(i, j);
+                island[i][j].rabbitsEatsGrass();
 
                 island[i][j].updateTerrain( isNearWater(i, j) );
             }
@@ -91,7 +90,7 @@ public class Island implements Cloneable{
         }
     }
 
-    private void updateRabbits(int i, int j)
+    private void moveRabbits(int i, int j)
     {
         int hungryRabbits = island[i][j].rabbitsNeedMoveCount();
         if ( hungryRabbits > 0 )
@@ -101,8 +100,7 @@ public class Island implements Cloneable{
                 this.moveRabbit(i ,j);
             }
         }
-        island[i][j].rabbitsEatsGrass();
-        island[i][j].rabbitsReproduction();
+
     }
 
     private void moveRabbit(int i, int j)
@@ -130,8 +128,12 @@ public class Island implements Cloneable{
 
     }
 
-    private void updateHunters(int i, int j)
+    private void moveHunters(int i, int j)
     {
+        if (island[i][j].getWolves() != 0)
+        {
+            return;
+        }
         int unsatisfiedHunters = island[i][j].getUnsatisfiedHunters();
         if ( unsatisfiedHunters > 0 )
         {

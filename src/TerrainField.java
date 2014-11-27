@@ -149,8 +149,15 @@ public class TerrainField {
             return 0; // if wolves exists, rabbits must live
         }
         int unsatisfiedHunters = this.getHunters() - this.getRabbits();
-        this.huntersKillsRabbits();
         return unsatisfiedHunters;
+    }
+
+    public void huntersKillsRabbits()
+    {
+        if (this.wolves == 0)
+        {
+            this.rabbits -= Math.min(this.getRabbits(), this.getHunters());
+        }
     }
 
     public boolean isAvailableForHunter()
@@ -253,11 +260,6 @@ public class TerrainField {
     public void removeHunter() { --this.deltaHunter; }
 
     public void addHunter() { ++this.deltaHunter; }
-
-    private void huntersKillsRabbits()
-    {
-        this.deltaRabbit -= Math.min(this.getRabbits(), this.getHunters());
-    }
 
     private void changeMeadow(boolean isNearWater) {
         if (this.sun == 0) {
