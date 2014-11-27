@@ -124,6 +124,30 @@ public class TerrainField {
         }
     }
 
+    public int getFreeWolves()
+    {
+        if ((this.getHunters() > 0) && (this.getWolves() > 0))
+        {
+            return this.getWolves() - 1;
+        }
+        if (this.getRabbits() == 0)
+        {
+            return this.getWolves();
+        }
+        return 0;
+    }
+
+    public boolean isAvailableForWolves()
+    {
+        int wolvesCountTomorrow = this.getWolves() + this.deltaWolf;
+        boolean isMaxWolfCountNotAchieved = wolvesCountTomorrow < MAX_WOLVES;
+        if ( (this.getTerrainType() == MEADOW) && isMaxWolfCountNotAchieved )
+        {
+            return true;
+        }
+        return false;
+    }
+
     public int rabbitsNeedMoveCount()
     {
         int hungryRabbits = this.getRabbits() - this.getJuiciness();
@@ -164,8 +188,8 @@ public class TerrainField {
     {
         int hunterCountTomorrow = (this.getHunters() + this.deltaHunter);
 
-        boolean isMaxHunterCountAchieved = hunterCountTomorrow < MAX_RABBITS;
-        if ( (this.getTerrainType() == MEADOW) && isMaxHunterCountAchieved )
+        boolean isMaxHunterCountNotAchieved = hunterCountTomorrow < MAX_HUNTERS;
+        if ( (this.getTerrainType() == MEADOW) && isMaxHunterCountNotAchieved )
         {
             return true;
         }
@@ -260,6 +284,10 @@ public class TerrainField {
     public void removeHunter() { --this.deltaHunter; }
 
     public void addHunter() { ++this.deltaHunter; }
+
+    public void removeWolf() { --this.deltaWolf; }
+
+    public void addWolf() { ++this.deltaWolf; }
 
     private void changeMeadow(boolean isNearWater) {
         if (this.sun == 0) {

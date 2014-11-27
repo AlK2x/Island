@@ -71,6 +71,8 @@ public class Island implements Cloneable{
         for (int i = 0; i < this.N; ++i) {
             for (int j = 0; j < this.N; ++j) {
 
+                this.moveWolves(i, j);
+
                 this.moveHunters(i, j);                 // if wolves doesn't exists
                 island[i][j].rabbitsReproduction();
                 island[i][j].huntersKillsRabbits();     // if wolves doesn't exists
@@ -87,6 +89,40 @@ public class Island implements Cloneable{
                 island[i][j].applyDeltas();
                 island[i][j].resetDeltas();
             }
+        }
+    }
+
+    private void moveWolves(int i, int j)
+    {
+        int freeWolves = island[i][j].getFreeWolves();
+        if ( freeWolves > 0 )
+        {
+            for (int it = 1; it <= freeWolves; ++it)
+            {
+                this.moveWolf(i ,j);
+            }
+        }
+
+    }
+
+    private void moveWolf(int i, int j)
+    {
+        Vector<Direction> availableDirVector = new Vector<Direction>();
+        availableDirVector.clear();
+        for (int it = 0; it < DIRECTIONS.length; ++it)
+        {
+            int currRow = i + DIRECTIONS[it].dx;
+            int currCol = j + DIRECTIONS[it].dy;
+            if (isCorrectCoordinate(currRow, currCol) && island[ currRow ][ currCol ].isAvailableForWolves())
+            {
+                availableDirVector.add( DIRECTIONS[it] );
+            }
+        }
+        if (!availableDirVector.isEmpty())
+        {
+            Direction randDir = getRandomDirection( availableDirVector );
+            island[i][j].removeWolf();
+            island[i + randDir.dx][j + randDir.dy].addWolf();
         }
     }
 
