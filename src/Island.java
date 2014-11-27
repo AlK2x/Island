@@ -71,11 +71,13 @@ public class Island implements Cloneable{
         for (int i = 0; i < this.N; ++i) {
             for (int j = 0; j < this.N; ++j) {
 
-                this.moveWolves(i, j);
-
-                this.moveHunters(i, j);                 // if wolves doesn't exists
-                island[i][j].rabbitsReproduction();
-                island[i][j].huntersKillsRabbits();     // if wolves doesn't exists
+                this.moveWolves(i, j);                  // волки, которые не под прицелом перемещаются
+                this.moveHunters(i, j);                 // охотники, которых не съедят волки
+                island[i][j].huntersKillsWolf();        // люди убивают 1 волка
+                island[i][j].wolvesKillsHunter();       // волки съедают 1 охотника
+                island[i][j].wolvesKillsRabbits();      // если нет охотнико, волки едят кроликов
+                island[i][j].rabbitsReproduction();     // в этой клетке появится 1 новый кролик, независимо будут там его родители или нет
+                island[i][j].huntersKillsRabbits();     // если нет волков, охотники убивают кролей
                 this.moveRabbits(i, j);
                 island[i][j].rabbitsEatsGrass();
 
@@ -128,10 +130,10 @@ public class Island implements Cloneable{
 
     private void moveRabbits(int i, int j)
     {
-        int hungryRabbits = island[i][j].rabbitsNeedMoveCount();
-        if ( hungryRabbits > 0 )
+        int freeRabbits = island[i][j].rabbitsNeedMoveCount();
+        if ( freeRabbits > 0 )
         {
-            for (int it = 1; it <= hungryRabbits; ++it)
+            for (int it = 1; it <= freeRabbits; ++it)
             {
                 this.moveRabbit(i ,j);
             }
@@ -166,14 +168,10 @@ public class Island implements Cloneable{
 
     private void moveHunters(int i, int j)
     {
-        if (island[i][j].getWolves() != 0)
+        int freeHunters = island[i][j].getFreeHunters();
+        if ( freeHunters > 0 )
         {
-            return;
-        }
-        int unsatisfiedHunters = island[i][j].getUnsatisfiedHunters();
-        if ( unsatisfiedHunters > 0 )
-        {
-            for (int it = 1; it <= unsatisfiedHunters; ++it)
+            for (int it = 1; it <= freeHunters; ++it)
             {
                 this.moveHunter(i ,j);
             }

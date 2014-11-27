@@ -126,7 +126,11 @@ public class TerrainField {
 
     public int getFreeWolves()
     {
-        if ((this.getHunters() > 0) && (this.getWolves() > 0))
+        if ((this.getWolves() > 0) && (this.getWolves() == this.getHunters()))
+        {
+            return this.getWolves();
+        }
+        if ((this.getWolves() > 0) && (this.getHunters() > this.getWolves()))
         {
             return this.getWolves() - 1;
         }
@@ -135,6 +139,22 @@ public class TerrainField {
             return this.getWolves();
         }
         return 0;
+    }
+
+    public void huntersKillsWolf()
+    {
+        if ((this.getWolves() > 0) && (this.getHunters() > this.getWolves()))
+        {
+            this.removeWolf();
+        }
+    }
+
+    public void wolvesKillsHunter()
+    {
+        if ((this.getHunters() > 0) && (this.getWolves() > this.getHunters()))
+        {
+            this.removeHunter();
+        }
     }
 
     public boolean isAvailableForWolves()
@@ -150,8 +170,10 @@ public class TerrainField {
 
     public int rabbitsNeedMoveCount()
     {
-        int hungryRabbits = this.getRabbits() - this.getJuiciness();
-        return hungryRabbits;
+        if (this.getWolves() == 0) {
+            return this.getRabbits() - this.getJuiciness();
+        }
+        return this.getRabbits() - 2*this.getWolves();
     }
 
     public boolean isAvailableForRabbit()
@@ -166,11 +188,15 @@ public class TerrainField {
         return false;
     }
 
-    public int getUnsatisfiedHunters()
+    public int getFreeHunters()
     {
-        if (this.getWolves() > 0)
+        if ((this.getHunters() > 0) && (this.getWolves() > this.getHunters()))
         {
-            return 0; // if wolves exists, rabbits must live
+            return this.getHunters() - 1;
+        }
+        if ((this.getHunters() > 0) &&(this.getWolves() == this.getHunters()))
+        {
+            return this.getHunters();
         }
         int unsatisfiedHunters = this.getHunters() - this.getRabbits();
         return unsatisfiedHunters;
@@ -178,9 +204,17 @@ public class TerrainField {
 
     public void huntersKillsRabbits()
     {
-        if (this.wolves == 0)
+        if (this.getWolves() == 0)
         {
             this.rabbits -= Math.min(this.getRabbits(), this.getHunters());
+        }
+    }
+
+    public void wolvesKillsRabbits()
+    {
+        if (this.getHunters() == 0)
+        {
+            this.rabbits -= Math.min(this.getRabbits(), 2*this.getWolves());
         }
     }
 
